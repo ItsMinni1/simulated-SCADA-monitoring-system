@@ -1,0 +1,40 @@
+apiVersion: 1
+
+datasources:
+  - name: InfluxDB
+    uid: InfluxDB
+    type: influxdb
+    access: proxy
+    url: http://influxdb:8086
+    database: sensor_bucket
+    jsonData:
+      version: InfluxQL
+      httpMode: GET
+      httpHeaderName1: 'Authorization'
+      httpHeaderName2: 'Accept'
+    secureJsonData:
+      httpHeaderValue1: 'Token my-super-secret-auth-token'
+      httpHeaderValue2: 'application/json'
+
+  - name: InfluxDB_v3
+    uid: influxdb3
+    type: influxdata-flightsql-datasource
+    access: proxy
+    url: influxdb:8086
+    jsonData:
+      token: my-super-secret-auth-token
+      database: sensor_bucket
+      secure: false
+    isDefault: false
+
+  - name: PostgreSQL
+    uid: PostgreSQL
+    type: postgres
+    url: postgres:5432
+    database: scada_db
+    user: scada_user
+    secureJsonData:
+      password: scada_password
+    jsonData:
+      sslmode: disable
+      postgresVersion: 15

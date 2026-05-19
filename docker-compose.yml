@@ -1,0 +1,138 @@
+version: "3.9"
+
+services:
+  kafka:
+    image: apache/kafka:latest
+    container_name: scada-kafka
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+    environment:
+      # KRaft Settings
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+      # Listeners
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+      # Performance Tuning
+      KAFKA_NUM_NETWORK_THREADS: 4
+      KAFKA_NUM_IO_THREADS: 8
+      KAFKA_SOCKET_SEND_BUFFER_BYTES: 102400
+      KAFKA_SOCKET_RECEIVE_BUFFER_BYTES: 102400
+      KAFKA_SOCKET_REQUEST_MAX_BYTES: 104857600
+      KAFKA_LOG_FLUSH_INTERVAL_MESSAGES: 10000
+      KAFKA_LOG_FLUSH_INTERVAL_MS: 1000
+
+      # Replication factors for single node
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+      # Cluster ID (Required for KRaft)
+      KAFKA_CLUSTER_ID: 4L6Target_S6G_UUnr8W8-Sg
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+
+  postgres:
+    image: postgres:15
+    container_name: scada-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=scada_user
+      - POSTGRES_PASSWORD=scada_password
+      - POSTGRES_DB=scada_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: scada-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - KAFKA_SERVER=kafka:9092
+      - DB_URL=postgresql://scada_user:scada_password@postgres:5432/scada_db
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=my-super-secret-auth-token
+      - INFLUXDB_ORG=scada_org
+      - INFLUXDB_BUCKET=sensor_bucket
+    depends_on:
+      - kafka
+      - postgres
+      - influxdb
+
+  influxdb:
+    image: influxdb:2.7
+    container_name: scada-influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=password123
+      - DOCKER_INFLUXDB_INIT_ORG=scada_org
+      - DOCKER_INFLUXDB_INIT_BUCKET=sensor_bucket
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-super-secret-auth-token
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+
+  grafana:
+    image: grafana/grafana:10.0.0
+    container_name: scada-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=influxdata-flightsql-datasource
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/etc/grafana/dashboards
+
+  spark:
+    build:
+      context: .
+      dockerfile: spark/Dockerfile
+    container_name: scada-spark
+    user: root
+    environment:
+      - KAFKA_SERVER=kafka:9092
+      - SPARK_DRIVER_MEMORY=2g
+      - SPARK_EXECUTOR_MEMORY=2g
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=my-super-secret-auth-token
+      - INFLUXDB_ORG=scada_org
+      - INFLUXDB_BUCKET=sensor_bucket
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./spark:/opt/spark/work-dir/app
+      - ./models:/opt/spark/work-dir/models
+    command: >
+      /bin/bash -c "/opt/spark/bin/spark-submit 
+      --master local[*] 
+      --driver-memory 2g 
+      --executor-memory 2g 
+      --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0,org.postgresql:postgresql:42.7.2 
+      /opt/spark/work-dir/app/scada_analyzer.py"
+    depends_on:
+      - kafka
+      - postgres
+
+volumes:
+  kafka_data:
+  postgres_data:
+  grafana_data:
+  influxdb_data:

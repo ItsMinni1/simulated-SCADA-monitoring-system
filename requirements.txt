@@ -1,0 +1,25 @@
+# Core Infrastructure
+kafka-python==2.0.2
+aiokafka==0.8.1
+numpy<=1.24.3
+pandas==2.0.3
+pyarrow==13.0.0
+typing-extensions>=3.6.6
+
+# ML & Training
+scikit-learn==1.3.0
+tensorflow==2.13.1
+joblib==1.3.2
+
+# Database Connectors
+psycopg2-binary==2.9.9
+asyncpg==0.28.0
+sqlalchemy==2.0.21
+influxdb-client==1.38.0
+
+# Backend API
+fastapi==0.103.1
+uvicorn==0.23.2
+firebase-admin==6.2.0
+requests==2.31.0
+python-multipart==0.0.6
