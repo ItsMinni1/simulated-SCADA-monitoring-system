@@ -19,21 +19,23 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  // Request Notification Permissions
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
-  await messaging.requestPermission(alert: true, badge: true, sound: true);
-
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
+  // Run app immediately to prevent white screen hang
   runApp(
     MultiProvider(
       providers: [ChangeNotifierProvider(create: (_) => WebSocketService())],
       child: const ScadaApp(),
     ),
   );
+
+  // Initialize Firebase and messaging asynchronously in the background
+  try {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    await messaging.requestPermission(alert: true, badge: true, sound: true);
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  } catch (e) {
+    developer.log('Firebase initialization skipped or failed: $e');
+  }
 }
 
 class ScadaApp extends StatelessWidget {

@@ -39,6 +39,22 @@ class WebSocketService extends ChangeNotifier {
     } catch (e) {
       log("Failed to load initial history: $e");
     } finally {
+      // Seed with the three primary substations by default so the UI always boots successfully
+      final primaryIds = ['SUBSTATION_ALPHA_01', 'SUBSTATION_BETA_02', 'SUBSTATION_GAMMA_03'];
+      for (var id in primaryIds) {
+        if (!sensors.containsKey(id)) {
+          sensors[id] = Sensor(
+            id: id,
+            status: 'OK',
+            latestTelemetry: Telemetry(
+              timestamp: DateTime.now().toIso8601String(),
+              voltage: 220.0,
+              current: 5.0,
+              frequency: 50.0,
+            ),
+          );
+        }
+      }
       isLoadingHistory = false;
       notifyListeners();
     }

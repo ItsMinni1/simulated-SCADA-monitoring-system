@@ -13,11 +13,18 @@ class NotificationsScreen extends StatelessWidget {
         child: ElevatedButton(
           onPressed: () async {
             final messenger = ScaffoldMessenger.of(context);
-            String? token = await FirebaseMessaging.instance.getToken();
-            log('FCM Token: $token');
-            messenger.showSnackBar(
-              const SnackBar(content: Text('FCM Token fetched successfully')),
-            );
+            try {
+              String? token = await FirebaseMessaging.instance.getToken();
+              log('FCM Token: $token');
+              messenger.showSnackBar(
+                const SnackBar(content: Text('FCM Token fetched successfully')),
+              );
+            } catch (e) {
+              log('Failed to fetch FCM Token: $e');
+              messenger.showSnackBar(
+                SnackBar(content: Text('FCM Token error: $e')),
+              );
+            }
           },
           child: const Text('Get FCM Token'),
         ),

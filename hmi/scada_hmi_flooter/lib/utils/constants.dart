@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AppConstants {
-  static const String baseUrl = 'http://localhost:8000';
-  static const String websocketUrl = 'ws://localhost:8000/ws/live';
+  static const String baseUrl = 'http://127.0.0.1:8000';
+  static const String websocketUrl = 'ws://127.0.0.1:8000/ws/live';
   static const String historyEndpoint = '/api/history';
   static const String alertsEndpoint = '/api/alerts';
 

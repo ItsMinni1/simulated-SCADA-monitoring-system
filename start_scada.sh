@@ -13,7 +13,9 @@ echo "--- SCADA Monitoring System Startup ---"
 echo "Stopping existing services..."
 docker compose down
 pkill -f "simulators/grid_sensor.py"
-pkill -f "flutter run"
+pkill -f "flutter" || true
+pkill -f "dart" || true
+fuser -k 8080/tcp || true
 
 echo "Starting Infrastructure (Kafka, Postgres, InfluxDB, Grafana, Spark, Backend)..."
 if ! docker compose up -d --build; then
