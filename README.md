@@ -57,3 +57,23 @@ A single script that orchestrates the following:
 - **Real-time Flow**: Simulator -> Kafka -> Backend -> WebSocket -> HMI.
 - **Analytics Flow**: Simulator -> Kafka -> Spark -> Postgres -> Backend -> HMI.
 - **HMI Features**: Provides live telemetry cards, historical trend charts, and an alert list with severity levels.
+
+# Screenshots
+
+## Grafana Dashboard
+<img width="1824" height="962" alt="Screenshot from 2026-05-09 14-50-19" src="https://github.com/user-attachments/assets/97dec9b3-98a1-4c9c-a320-198976ba00b4" />
+
+## Flutter HMI Application
+
+### Main Dashboard (Three substations: Alpha, Beta and Gamma)
+
+<img width="414" height="787" alt="Screenshot from 2026-05-24 08-27-42" src="https://github.com/user-attachments/assets/aaba632f-fe55-414a-86bc-d032c0fb2ede" />
+
+<img width="414" height="787" alt="Screenshot from 2026-05-24 08-27-50" src="https://github.com/user-attachments/assets/a03e04a5-c04b-4ecd-9bd4-9bc3c7c26f1f" />
+
+<img width="414" height="787" alt="Screenshot from 2026-05-24 08-28-02" src="https://github.com/user-attachments/assets/cab434f4-7003-476a-95d3-d6d7ebc794b2" />
+
+### Alerts Log Screen
+
+<img width="546" height="963" alt="Screenshot from 2026-05-13 05-39-01" src="https://github.com/user-attachments/assets/c3264e4e-cb48-45f4-834b-3598992704bd" />
+
