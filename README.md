@@ -2,6 +2,8 @@
 
 A comprehensive SCADA (Supervisory Control and Data Acquisition) system built with a modern microservices architecture for real-time monitoring and anomaly detection in industrial grids.
 
+This project has won the IEEE Department Innovation Challenge 2026, at Bahria University Islamabad.
+
 ## Architecture Overview
 
 The system consists of several integrated components:
